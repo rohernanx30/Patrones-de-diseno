@@ -1,35 +1,100 @@
 <?php
 
-interface IWindows10 {
-    public function abrirArchivo($archivo): string;
+interface IArchivo {
+    public function openDocument();
 }
 
-// Clase sistema antiguo (Windows 7)
-class OldWindows7 {
-    public function fetchArchivo($archivo): string {
-        // Simula abrir archivo en sistema antiguo
-        return "Archivo '$archivo' creado en Windows 7";
+//Interfaz para los archivos que sean de la versión 7
+interface IDocuments7 {
+    public function open();
+}
+
+//Clases de la versión 7
+class Word7 implements IDocuments7 {
+    public function open() {
+        echo "Abriendo documento Word 7";
     }
 }
 
-// Adaptador OldWindows7 a Windows10
-class Windows10Adapter implements IWindows10 {
-    private OldWindows7 $oldSystem;
-
-    public function __construct(OldWindows7 $oldSystem) {
-        $this->oldSystem = $oldSystem;
-    }
-
-    // Método del nuevo sistema (Windows 10)
-    public function abrirArchivo($archivo): string {
-        $resultadoViejo = $this->oldSystem->fetchArchivo($archivo);
-        return "Windows 10 (modo compatibilidad): $resultadoViejo";
+class Excel7 implements IDocuments7 {
+    public function open() {
+        echo "Abriendo documento Excel 7";
     }
 }
 
-// Uso 
-$archivo = "documento.docx";
-$windows7 = new OldWindows7();
-$windows10 = new Windows10Adapter($windows7);
+class PowerPoint7 implements IDocuments7 {
+    public function open() {
+        echo "Abriendo presentación PowerPoint 7";
+    }
+}
 
-echo $windows10->abrirArchivo($archivo);
+//Clases nativas de la versión 10
+class Word10 implements IArchivo {
+    public function openDocument() {
+        echo "Abriendo documento Word 10";
+    }
+}
+
+class Excel10 implements IArchivo {
+    public function openDocument() {
+        echo "Abriendo documento Excel 10";
+    }
+}
+
+class PowerPoint10 implements IArchivo {
+    public function openDocument() {
+        echo "Abriendo presentación PowerPoint 10";
+    }
+}
+
+//Adaptador general para documentos de la versión 7
+class AdapterDoc implements IArchivo {
+
+    private IDocuments7 $documento;
+
+    public function __construct(IDocuments7 $doc) {
+        $this->documento = $doc;
+    }
+
+    public function openDocument() {
+        echo "Adaptando documento de Windows 7 a Windows 10 <br>";
+        $this->documento->open();
+    }
+}
+
+//Sistema Windows 10 que recibe documentos
+class Windows10System {
+    public function verDocuments(IArchivo $documento) {
+        return $documento->openDocument();
+    }
+}
+
+    $word7 = new Word7();
+    $excel7 = new Excel7();
+    $ppt7   = new PowerPoint7();
+
+    $word10 = new Word10();
+    $excel10 = new Excel10();
+    $ppt10   = new PowerPoint10();
+
+    $system = new Windows10System();
+
+    //Abrir documentos de Windows 7 con compatibilidad
+    $system->verDocuments(new AdapterDoc($word7)); 
+    echo "<br>";
+
+    $system->verDocuments(new AdapterDoc($excel7));
+    echo "<br>";
+
+    $system->verDocuments(new AdapterDoc($ppt7));
+    echo "<br><br>";
+
+    //Abrir documentos nativos de Windows 10
+    echo "Documentos nativos de Windows 10:<br>";
+    $system->verDocuments($word10);
+    echo "<br>";
+
+    $system->verDocuments($excel10);
+    echo "<br>";
+
+    $system->verDocuments($ppt10);
